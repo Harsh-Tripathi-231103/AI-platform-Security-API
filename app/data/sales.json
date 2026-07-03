@@ -1,0 +1,37 @@
+[
+  {
+    "date": "2026-06-26",
+    "region": "North",
+    "amount": "999.00"
+  },
+  {
+    "date": "2026-06-29",
+    "region": "North",
+    "amount": "1200.50"
+  },
+  {
+    "date": "2026-06-30",
+    "region": "South",
+    "amount": "850.00"
+  },
+  {
+    "date": "2026-07-01",
+    "region": "North",
+    "amount": "400.00"
+  },
+  {
+    "date": "2026-07-02",
+    "region": "West",
+    "amount": "1500.00"
+  },
+  {
+    "date": "2026-07-02",
+    "region": "South",
+    "amount": "250.00"
+  },
+  {
+    "date": "2026-07-03",
+    "region": "East",
+    "amount": "799.50"
+  }
+]
