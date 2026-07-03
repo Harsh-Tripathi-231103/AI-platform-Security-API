@@ -8,6 +8,7 @@ from fastapi import Request
 from app.api.ask import router as ask_router
 from app.core.audit import configure_logging, reset_request_id, set_request_id
 from app.core.config import get_settings
+from app.core.exceptions import register_exception_handlers, unhandled_exception_handler
 
 
 settings = get_settings()
@@ -18,6 +19,7 @@ app = FastAPI(
     version="0.1.0",
     description="A security-first enterprise AI workflow API.",
 )
+register_exception_handlers(app)
 app.include_router(ask_router)
 
 
@@ -27,7 +29,12 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
     request_id = str(uuid4())
     token = set_request_id(request_id)
     try:
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception as exception:
+            # Handle failures before the request context is reset so the error
+            # body, response header, and audit event share one correlation ID.
+            response = await unhandled_exception_handler(request, exception)
         response.headers["X-Request-ID"] = request_id
         return response
     finally:

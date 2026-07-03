@@ -23,6 +23,7 @@ class AuditEvent(StrEnum):
     REQUEST_REJECTED = "request_rejected"
     BUSINESS_ACTION_SUCCEEDED = "business_action_succeeded"
     BUSINESS_ACTION_FAILED = "business_action_failed"
+    INTERNAL_ERROR = "internal_error"
 
 
 def configure_logging(log_level: str) -> None:

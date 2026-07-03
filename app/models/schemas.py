@@ -45,3 +45,21 @@ class AskResponse(BaseModel):
     request_id: str
     answer: str
     action: ActionResult | None = None
+
+
+class ErrorDetail(BaseModel):
+    """Safe, consistent error information returned to API clients."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    code: str
+    message: str
+    request_id: str
+
+
+class ErrorResponse(BaseModel):
+    """Top-level envelope for every controlled API error."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    error: ErrorDetail
