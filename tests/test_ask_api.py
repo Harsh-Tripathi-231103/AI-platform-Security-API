@@ -31,6 +31,7 @@ def test_analyst_generates_sales_report() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["request_id"]
+    assert response.headers["X-Request-ID"] == body["request_id"]
     assert body["action"]["name"] == "generate_sales_report"
     assert body["action"]["data"]["total_sales"] == "5000.00"
     assert body["action"]["data"]["transaction_count"] == 6
@@ -96,3 +97,10 @@ def test_openapi_documents_api_key_header() -> None:
         "in": "header",
         "name": "X-API-Key",
     }
+
+
+def test_generates_a_unique_request_id_for_each_call() -> None:
+    first = ask("Generate a sales report", ANALYST_KEY)
+    second = ask("Generate a sales report", ANALYST_KEY)
+
+    assert first.headers["X-Request-ID"] != second.headers["X-Request-ID"]

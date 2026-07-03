@@ -6,6 +6,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 
+from app.core.audit import AuditEvent, record_audit_event
 from app.core.security import AuthenticatedUser, UserRole, authenticate_api_key
 
 
@@ -37,10 +38,25 @@ def authorize(
     """Return the user when authorized, otherwise fail with a safe 403."""
     granted_permissions = ROLE_PERMISSIONS.get(user.role, frozenset())
     if permission not in granted_permissions:
+        record_audit_event(
+            AuditEvent.AUTHORIZATION_FAILED,
+            outcome="failure",
+            user_id=user.user_id,
+            role=user.role.value,
+            action=permission.value,
+            reason="permission_denied",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions",
         )
+    record_audit_event(
+        AuditEvent.AUTHORIZATION_SUCCEEDED,
+        outcome="success",
+        user_id=user.user_id,
+        role=user.role.value,
+        action=permission.value,
+    )
     return user
 
 

@@ -8,6 +8,7 @@ from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, ConfigDict
 
+from app.core.audit import AuditEvent, record_audit_event
 from app.core.config import Settings, get_settings
 
 
@@ -53,6 +54,11 @@ def authenticate_api_key(
 ) -> AuthenticatedUser:
     """Authenticate an API key and map it to a stable identity and role."""
     if not api_key:
+        record_audit_event(
+            AuditEvent.AUTHENTICATION_FAILED,
+            outcome="failure",
+            reason="missing_api_key",
+        )
         raise _authentication_error()
 
     credentials = (
@@ -63,6 +69,18 @@ def authenticate_api_key(
 
     for expected_key, user_id, role in credentials:
         if secrets.compare_digest(api_key, expected_key):
-            return AuthenticatedUser(user_id=user_id, role=role)
+            user = AuthenticatedUser(user_id=user_id, role=role)
+            record_audit_event(
+                AuditEvent.AUTHENTICATION_SUCCEEDED,
+                outcome="success",
+                user_id=user.user_id,
+                role=user.role.value,
+            )
+            return user
 
+    record_audit_event(
+        AuditEvent.AUTHENTICATION_FAILED,
+        outcome="failure",
+        reason="invalid_api_key",
+    )
     raise _authentication_error()
